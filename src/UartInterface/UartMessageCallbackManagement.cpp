@@ -13,15 +13,15 @@ namespace UartMessageInterface
         return *_Instance;
     }
 
-    void UartMessageCallbackManagement::registerRequestGetCallBack(eDataType dataType, const std::string &name, const CallBackRequestGet &func)
+    void UartMessageCallbackManagement::registerRequestGetCallBack(eDataType dataType, const std::string &, const CallBackRequestGet func)
     {
-        getInstance()._callBackListRequestGet.insert(make_pair(make_tuple(dataType, name), func));
+        getInstance()._callBackListRequestGet.insert(make_pair(dataType, func));
     }
 
     void UartMessageCallbackManagement::invokeRequestGetCallBack(eDataType dataType, const std::string &name)
     {
-        std::map<std::tuple<eDataType, std::string>, CallBackRequestGet>::iterator iter =
-            getInstance()._callBackListRequestGet.find(make_tuple(dataType, name));
+        CallBackListRequestGet::iterator iter =
+            getInstance()._callBackListRequestGet.find(dataType);
 
         if (iter == getInstance()._callBackListRequestGet.end())
             return;
@@ -29,15 +29,15 @@ namespace UartMessageInterface
         iter->second(dataType, name);
     }
 
-    void UartMessageCallbackManagement::registerResponseGetCallBack(eDataType dataType, const std::string &name, const CallBackResponseGet &func)
+    void UartMessageCallbackManagement::registerResponseGetCallBack(eDataType dataType, const std::string &, const CallBackResponseGet func)
     {
-        getInstance()._callBackListResponseGet.insert(make_pair(make_tuple(dataType, name), func));
+        getInstance()._callBackListResponseGet.insert(make_pair(dataType, func));
     }
 
     void UartMessageCallbackManagement::invokeResponseGetCallBack(eDataType dataType, const std::string &name, const Value &value)
     {
-        std::map<std::tuple<eDataType, std::string>, CallBackResponseGet>::iterator iter =
-            getInstance()._callBackListResponseGet.find(make_tuple(dataType, name));
+        CallBackListResponseGet::iterator iter =
+            getInstance()._callBackListResponseGet.find(dataType);
 
         if (iter == getInstance()._callBackListResponseGet.end())
             return;
@@ -50,12 +50,12 @@ namespace UartMessageInterface
         getInstance()._callBackSubscribe = func;
     }
 
-    void UartMessageCallbackManagement::invokeSubscribeCallBack(eDataType dataType, const std::string &name, uint32_t period)
+    void UartMessageCallbackManagement::invokeSubscribeCallBack(eDataType dataType, const std::string &name, unsigned int period)
     {
         getInstance()._callBackSubscribe(dataType, name, period);
     }
 
-    void UartMessageCallbackManagement::registerUnsubscribeCallBack(CallBackUnsubscribe &func)
+    void UartMessageCallbackManagement::registerUnsubscribeCallBack(CallBackUnsubscribe func)
     {
         getInstance()._callBackUnsubscribe = func;
     }

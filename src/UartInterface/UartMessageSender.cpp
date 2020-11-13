@@ -1,5 +1,4 @@
-#include <Arduino.h>
-#include <iostream>
+#include "Arduino.h"
 #include "UartMessageSender.h"
 
 namespace UartMessageInterface
@@ -100,7 +99,7 @@ namespace UartMessageInterface
         _command->InsertEndChild(child);
     }
 
-    void UartMessageSender::appendSubscribe(eDataType type, const std::string &name, uint32_t period)
+    void UartMessageSender::appendSubscribe(eDataType type, const std::string &name, unsigned int period)
     {
         XMLElement *child = NULL;
         switch (type)
@@ -139,7 +138,7 @@ namespace UartMessageInterface
         _command->InsertEndChild(child);
     }
 
-    void UartMessageSender::appendSubscribeAll(eDataType type, uint32_t period)
+    void UartMessageSender::appendSubscribeAll(eDataType type, unsigned int period)
     {
         if (type != SensorAll || type != ControlAll)
             return;

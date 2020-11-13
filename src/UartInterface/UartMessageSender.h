@@ -1,8 +1,10 @@
 #ifndef _UART_MESSAGE_SENDER_H_
 #define _UART_MESSAGE_SENDER_H_
 
-#include <string>
-#include <ctime>
+#include "ArduinoSTL.h"
+#include "system_configuration.h"
+#include "unwind-cxx.h"
+
 #include "tinyxml2/tinyxml2.h"
 #include "UartMessageInterface.h"
 #include "UartMessageCallbackManagement.h"
@@ -62,8 +64,8 @@ namespace UartMessageInterface
         }
 
         // Subscribe
-        void appendSubscribe(eDataType type, const std::string &name, uint32_t period); // All 이면 return;
-        void appendSubscribeAll(eDataType type, uint32_t period);                  // 나머지 비우고 All로
+        void appendSubscribe(eDataType type, const std::string &name, unsigned int period); // All 이면 return;
+        void appendSubscribeAll(eDataType type, unsigned int period);                  // 나머지 비우고 All로
 
         // Unsubscribe
         void appendUnsubscribe(eDataType type, const std::string &name); // All 이면 return;
@@ -72,7 +74,7 @@ namespace UartMessageInterface
         std::string sendMessage();
 
     private:
-        uint32_t _seqId;
+        unsigned int _seqId;
         XMLDocument _xmlDoc;
         XMLElement *_command;
         UartMessageSender();

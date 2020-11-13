@@ -1,8 +1,10 @@
 #ifndef _MESSAGE_INTERFACE_H_
 #define _MESSAGE_INTERFACE_H_
 
-#include <string>
-#include <ctime>
+#include "ArduinoSTL.h"
+#include "system_configuration.h"
+#include "unwind-cxx.h"
+
 #include "tinyxml2/tinyxml2.h"
 
 using namespace tinyxml2;
@@ -50,7 +52,7 @@ namespace UartMessageInterface
     {
         eValueType type;
         union {
-            uint32_t val_int;
+            unsigned int val_int;
             double val_double;
         } value;
     };

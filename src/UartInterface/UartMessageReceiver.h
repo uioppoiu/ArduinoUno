@@ -1,8 +1,10 @@
 #ifndef _UART_MESSAGE_RECEIVER_H_
 #define _UART_MESSAGE_RECEIVER_H_
 
-#include <string>
-#include <ctime>
+#include "ArduinoSTL.h"
+#include "system_configuration.h"
+#include "unwind-cxx.h"
+
 #include "tinyxml2/tinyxml2.h"
 #include "UartMessageInterface.h"
 #include "UartMessageCallbackManagement.h"

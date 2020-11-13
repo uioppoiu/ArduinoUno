@@ -1,4 +1,3 @@
-#include <iostream>
 #include "UartMessageReceiver.h"
 
 namespace UartMessageInterface
@@ -105,7 +104,7 @@ namespace UartMessageInterface
 
         eDataType dataType = str2EnumDataType(element->Name());
         std::string name = element->Attribute("NAME");
-        uint32_t period = element->UnsignedAttribute("PERIOD");
+        unsigned int period = element->UnsignedAttribute("PERIOD");
 
         UartMessageCallbackManagement::invokeSubscribeCallBack(dataType, name, period);
     }
