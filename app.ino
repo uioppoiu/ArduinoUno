@@ -1,6 +1,6 @@
-#include "ArduinoSTL.h"
-#include "system_configuration.h"
-#include "unwind-cxx.h"
+#include <ArduinoJson.h>
+
+#include "src/UartInterface/tinyxml2/tinyxml2.h"
 #include "src/UartInterface/UartMessageInterface.h"
 #include "src/UartInterface/UartMessageCallbackManagement.h"
 #include "src/UartInterface/UartMessageSender.h"
@@ -44,16 +44,14 @@ void setup()
     // initialize digital pin LED_BUILTIN as an output.
     pinMode(LED_BUILTIN, OUTPUT);
 
-
-
     // Example
     // Callback 등록 (Get Request)
-    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(UartMessageInterface::SensorTemperature, "ROOM", onRequestTemp1);
-    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(UartMessageInterface::SensorTemperature, "WATER", onRequestTemp1);
+    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(onRequestTemp1);
+    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(onRequestTemp1);
 
     // Callback 등록 (Get Response)
-    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(UartMessageInterface::SensorTemperature, "ROOM", onResponseTemp2);
-    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(UartMessageInterface::SensorTemperature, "WATER", onResponseTemp2);
+    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(onResponseTemp2);
+    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(onResponseTemp2);
 
     // Get Request Message 전달
     UartMessageInterface::UartMessageSender reqTemp(UartMessageInterface::Request, UartMessageInterface::Get);
@@ -86,9 +84,9 @@ void loop()
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
     delay(200);                      // wait for a second
 
-    if (Serial.available())
-    {
-        String str = Serial.readString();
-        Serial.println(str);
-    }
+    // if (Serial.available())
+    // {
+    //     String str = Serial.readString();
+    //     Serial.println(str);
+    // }
 }

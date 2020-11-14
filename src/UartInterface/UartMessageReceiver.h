@@ -1,15 +1,11 @@
 #ifndef _UART_MESSAGE_RECEIVER_H_
 #define _UART_MESSAGE_RECEIVER_H_
 
-#include "ArduinoSTL.h"
-#include "system_configuration.h"
-#include "unwind-cxx.h"
 
-#include "tinyxml2/tinyxml2.h"
+#include <Arduino.h>
+#include <ArduinoJson.h>
 #include "UartMessageInterface.h"
 #include "UartMessageCallbackManagement.h"
-
-using namespace tinyxml2;
 
 namespace UartMessageInterface
 {
@@ -21,7 +17,7 @@ namespace UartMessageInterface
         void processMessage();
         
     private:
-        XMLDocument _xmlDoc;
+        DynamicJsonDocument _jsonDoc;
         UartMessageReceiver();
 
         bool isUartMessage(const std::string &message);

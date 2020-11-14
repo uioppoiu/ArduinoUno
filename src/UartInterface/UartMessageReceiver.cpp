@@ -3,6 +3,7 @@
 namespace UartMessageInterface
 {
     UartMessageReceiver::UartMessageReceiver(const std::string &message)
+        : _jsonDoc(512)
     {
         if (isUartMessage(message) == false)
         {
@@ -16,17 +17,7 @@ namespace UartMessageInterface
             return;
         }
 
-        int32_t retVal = _xmlDoc.Parse(message.c_str(), message.size() - 1);
-        if(retVal != XML_SUCCESS)
-        {
-            // throw invalid_argument("Parsing error");
-            return;
-        }
-
-        // XMLPrinter xmlPrint;
-        // _xmlDoc.Print(&xmlPrint);
-        // std::string buf = xmlPrint.CStr();
-        // cout << buf << endl;
+        deserializeJson(_jsonDoc, message.c_str(), message.size() -1);
     }
 
     bool UartMessageReceiver::isMessageValid()

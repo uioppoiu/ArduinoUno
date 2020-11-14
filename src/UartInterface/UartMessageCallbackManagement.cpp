@@ -13,9 +13,10 @@ namespace UartMessageInterface
         return *_Instance;
     }
 
-    void UartMessageCallbackManagement::registerRequestGetCallBack(eDataType dataType, const std::string &, const CallBackRequestGet func)
+    void UartMessageCallbackManagement::registerRequestGetCallBack(const CallBackRequestGet func)
     {
-        getInstance()._callBackListRequestGet.insert(make_pair(dataType, func));
+        getInstance()._callBackRequestGet = func;
+
     }
 
     void UartMessageCallbackManagement::invokeRequestGetCallBack(eDataType dataType, const std::string &name)
@@ -29,9 +30,10 @@ namespace UartMessageInterface
         iter->second(dataType, name);
     }
 
-    void UartMessageCallbackManagement::registerResponseGetCallBack(eDataType dataType, const std::string &, const CallBackResponseGet func)
+    void UartMessageCallbackManagement::registerResponseGetCallBack(const CallBackResponseGet func)
     {
-        getInstance()._callBackListResponseGet.insert(make_pair(dataType, func));
+        getInstance()._callBackResponseGet = func;
+
     }
 
     void UartMessageCallbackManagement::invokeResponseGetCallBack(eDataType dataType, const std::string &name, const Value &value)
@@ -45,7 +47,7 @@ namespace UartMessageInterface
         iter->second(dataType, name, value);
     }
 
-    void UartMessageCallbackManagement::registerSubscribeCallBack(CallBackSubscribe &func)
+    void UartMessageCallbackManagement::registerSubscribeCallBack(const CallBackSubscribe func)
     {
         getInstance()._callBackSubscribe = func;
     }
@@ -55,7 +57,7 @@ namespace UartMessageInterface
         getInstance()._callBackSubscribe(dataType, name, period);
     }
 
-    void UartMessageCallbackManagement::registerUnsubscribeCallBack(CallBackUnsubscribe func)
+    void UartMessageCallbackManagement::registerUnsubscribeCallBack(const CallBackUnsubscribe func)
     {
         getInstance()._callBackUnsubscribe = func;
     }

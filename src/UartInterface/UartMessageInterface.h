@@ -1,13 +1,7 @@
 #ifndef _MESSAGE_INTERFACE_H_
 #define _MESSAGE_INTERFACE_H_
 
-#include "ArduinoSTL.h"
-#include "system_configuration.h"
-#include "unwind-cxx.h"
-
-#include "tinyxml2/tinyxml2.h"
-
-using namespace tinyxml2;
+#include <Arduino.h>
 
 namespace UartMessageInterface
 {
