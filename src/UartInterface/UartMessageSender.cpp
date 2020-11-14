@@ -4,7 +4,7 @@
 namespace UartMessageInterface
 {
     UartMessageSender::UartMessageSender(eMessageType messageType, eCommandType commandType)
-        : _seqId(0), _jsonDoc(512)
+        : _seqId(0), _jsonDoc(256)
     {
         switch (messageType)
         {
@@ -45,6 +45,11 @@ namespace UartMessageInterface
         }
     }
 
+    UartMessageSender::~UartMessageSender()
+    {
+        _jsonDoc.garbageCollect();
+    }
+
     void UartMessageSender::appendRequestAll(eDataType type)
     {
         if (type != SensorAll || type != ControlAll)
@@ -52,14 +57,15 @@ namespace UartMessageInterface
 
         _jsonDoc.remove("Data");
         JsonArray dataArr = _jsonDoc.createNestedArray("Data");
+        JsonObject data = dataArr.createNestedObject();
 
         if (type == SensorAll)
-            dataArr.add("SensorAll");
+            data["Type"] = "SensorAll";
         else if (type == ControlAll)
-            dataArr.add("ControlAll");
+            data["Type"] = "ControlAll";
     }
 
-    void UartMessageSender::appendRequest(eDataType dataType, const std::string &name)
+    void UartMessageSender::appendRequest(eDataType dataType, const String &name)
     {
         if (!_jsonDoc.containsKey("Data"))
         {
@@ -67,28 +73,29 @@ namespace UartMessageInterface
         }
 
         JsonArray dataArr = _jsonDoc.getMember("Data");
+        JsonObject data = dataArr.createNestedObject();
         switch (dataType)
         {
         case SensorTemperature:
-            dataArr.add("SensorTemperature");
+            data["Type"] = "SensorTemperature";
             break;
         case SensorCO2:
-            dataArr.add("SensorCO2");
+            data["Type"] = "SensorCO2";
             break;
         case SensorHumidity:
-            dataArr.add("SensorHumidity");
+            data["Type"] = "SensorHumidity";
             break;
         case SensorConductivity:
-            dataArr.add("SensorConductivity");
+            data["Type"] = "SensorConductivity";
             break;
         case Control1:
-            dataArr.add("Control1");
+            data["Type"] = "Control1";
             break;
         case Control2:
-            dataArr.add("Control2");
+            data["Type"] = "Control2";
             break;
         case DateTime:
-            dataArr.add("DateTime");
+            data["Type"] = "DateTime";
             break;
         case SensorAll:
         case ControlAll:
@@ -97,9 +104,10 @@ namespace UartMessageInterface
         default:
             return;
         }
+        data["Name"] = name;
     }
 
-    void UartMessageSender::appendSubscribe(eDataType dataType, const std::string &name, unsigned int period)
+    void UartMessageSender::appendSubscribe(eDataType dataType, const String &name, unsigned int period)
     {
         if (!_jsonDoc.containsKey("Data"))
         {
@@ -107,58 +115,59 @@ namespace UartMessageInterface
         }
 
         JsonArray dataArr = _jsonDoc.getMember("Data");
-        JsonObject data = dataArr.addElement();
+        JsonObject data = dataArr.createNestedObject();
         switch (dataType)
         {
         case SensorTemperature:
-            data["Name"] = "SensorTemperature";
+            data["Type"] = "SensorTemperature";
             break;
         case SensorCO2:
-            data["Name"] = "SensorCO2";
+            data["Type"] = "SensorCO2";
             break;
         case SensorHumidity:
-            data["Name"] = "SensorHumidity";
+            data["Type"] = "SensorHumidity";
             break;
         case SensorConductivity:
-            data["Name"] = "SensorConductivity";
+            data["Type"] = "SensorConductivity";
             break;
         case Control1:
-            data["Name"] = "Control1";
+            data["Type"] = "Control1";
             break;
         case Control2:
-            data["Name"] = "Control2";
+            data["Type"] = "Control2";
             break;
         case DateTime:
-            data["Name"] = "DateTime";
+            data["Type"] = "DateTime";
             break;
         case SensorAll:
         case ControlAll:
-            appendRequestAll(dataType);
+            appendSubscribeAll(dataType, period);
             return;
         default:
             return;
         }
+        data["Name"] = name;
         data["Period"] = period;
     }
 
     void UartMessageSender::appendSubscribeAll(eDataType dataType, unsigned int period)
     {
-        if (type != SensorAll || type != ControlAll)
+        if (dataType != SensorAll || dataType != ControlAll)
             return;
 
         _jsonDoc.remove("Data");
         JsonArray dataArr = _jsonDoc.createNestedArray("Data");
-        JsonObject data = dataArr.addElement();
+        JsonObject data = dataArr.createNestedObject();
 
         if (dataType == SensorAll)
-            data["Name"] = "SensorAll";
+            data["Type"] = "SensorAll";
         else if (dataType == ControlAll)
-            data["Name"] = "ControlAll";
+            data["Type"] = "ControlAll";
 
         data["Period"] = period;        
     }
 
-    void UartMessageSender::appendUnsubscribe(eDataType dataType, const std::string &name)
+    void UartMessageSender::appendUnsubscribe(eDataType dataType, const String &name)
     {
         if (!_jsonDoc.containsKey("Data"))
         {
@@ -166,28 +175,29 @@ namespace UartMessageInterface
         }
 
         JsonArray dataArr = _jsonDoc.getMember("Data");
+        JsonObject data = dataArr.createNestedObject();
         switch (dataType)
         {
         case SensorTemperature:
-            dataArr.add("SensorTemperature");
+            data["Type"] = "SensorTemperature";
             break;
         case SensorCO2:
-            dataArr.add("SensorCO2");
+            data["Type"] = "SensorCO2";
             break;
         case SensorHumidity:
-            dataArr.add("SensorHumidity");
+            data["Type"] = "SensorHumidity";
             break;
         case SensorConductivity:
-            dataArr.add("SensorConductivity");
+            data["Type"] = "SensorConductivity";
             break;
         case Control1:
-            dataArr.add("Control1");
+            data["Type"] = "Control1";
             break;
         case Control2:
-            dataArr.add("Control2");
+            data["Type"] = "Control2";
             break;
         case DateTime:
-            dataArr.add("DateTime");
+            data["Type"] = "DateTime";
             break;
         case SensorAll:
         case ControlAll:
@@ -196,32 +206,33 @@ namespace UartMessageInterface
         default:
             return;
         }
+        data["Name"] = name;
     }
 
-    void UartMessageSender::appendUnsubscribeAll(eDataType type)
+    void UartMessageSender::appendUnsubscribeAll(eDataType dataType)
     {
-        if (type != SensorAll || type != ControlAll)
+        if (dataType != SensorAll || dataType != ControlAll)
             return;
 
         _jsonDoc.remove("Data");
         JsonArray dataArr = _jsonDoc.createNestedArray("Data");
+        JsonObject data = dataArr.createNestedObject();
 
-        if (type == SensorAll)
-            dataArr.add("SensorAll");
-        else if (type == ControlAll)
-            dataArr.add("ControlAll");
+        if (dataType == SensorAll)
+            data["Type"] = "SensorAll";
+        else if (dataType == ControlAll)
+            data["Type"] = "ControlAll";
     }
 
-    std::string UartMessageSender::sendMessage()
+    void UartMessageSender::sendMessage()
     {
-        std::string buf;
-        serializeMsgPack(_jsonDoc, buf);
+        String buf;
+        serializeJson(_jsonDoc, buf);
         appendCheckSum(buf);
 
         Serial.println(buf.c_str());
-        // cout << buf << endl;
 
-        return buf;
+        _jsonDoc.garbageCollect();
     }
 
 }; // namespace UartMessageInterface

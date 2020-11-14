@@ -12,14 +12,15 @@ namespace UartMessageInterface
     {
     public:
         UartMessageSender(eMessageType messageType, eCommandType commandType);
+        ~UartMessageSender();
 
         // Request
-        void appendRequest(eDataType type, const std::string &name); // All 이면 return;
+        void appendRequest(eDataType type, const String &name); // All 이면 return;
         void appendRequestAll(eDataType type);                  // 나머지 비우고 All로
 
         // Response
         template<typename VALUE_TYPE>
-        void appendResponse(eDataType type, const std::string &name, const VALUE_TYPE &value, eValueType valueType)
+        void appendResponse(eDataType dataType, const String &name, const VALUE_TYPE &value, eValueType valueType)
         {
             if (!_jsonDoc.containsKey("Data"))
             {
@@ -27,45 +28,57 @@ namespace UartMessageInterface
             }
 
             JsonArray dataArr = _jsonDoc.getMember("Data");
-            JsonObject data = dataArr.addElement();
+            JsonObject data = dataArr.createNestedObject();
             switch (dataType)
             {
             case SensorTemperature:
-                data["Name"] = "SensorTemperature";
+                data["Type"] = "SensorTemperature";
                 break;
             case SensorCO2:
-                data["Name"] = "SensorCO2";
+                data["Type"] = "SensorCO2";
                 break;
             case SensorHumidity:
-                data["Name"] = "SensorHumidity";
+                data["Type"] = "SensorHumidity";
                 break;
             case SensorConductivity:
-                data["Name"] = "SensorConductivity";
+                data["Type"] = "SensorConductivity";
                 break;
             case Control1:
-                data["Name"] = "Control1";
+                data["Type"] = "Control1";
                 break;
             case Control2:
-                data["Name"] = "Control2";
+                data["Type"] = "Control2";
                 break;
             case DateTime:
-                data["Name"] = "DateTime";
+                data["Type"] = "DateTime";
                 break;
             default:
                 return;
             }
-            data["Value"] = value;
+
+            data["Name"] = name;
+
+            if (valueType == Float)
+            {
+                data["ValueType"] = "Float";
+                data["Value"] = (float)value;
+            }
+            else // Integer
+            {
+                data["ValueType"] = "Integer";
+                data["Value"] = (int)value;
+            }
         }
 
         // Subscribe
-        void appendSubscribe(eDataType type, const std::string &name, unsigned int period); // All 이면 return;
+        void appendSubscribe(eDataType type, const String &name, unsigned int period); // All 이면 return;
         void appendSubscribeAll(eDataType type, unsigned int period);                  // 나머지 비우고 All로
 
         // Unsubscribe
-        void appendUnsubscribe(eDataType type, const std::string &name); // All 이면 return;
+        void appendUnsubscribe(eDataType type, const String &name); // All 이면 return;
         void appendUnsubscribeAll(eDataType type);                  // 나머지 비우고 All로
 
-        std::string sendMessage();
+        void sendMessage();
 
     private:
         unsigned int _seqId;

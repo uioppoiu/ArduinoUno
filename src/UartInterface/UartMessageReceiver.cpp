@@ -2,7 +2,7 @@
 
 namespace UartMessageInterface
 {
-    UartMessageReceiver::UartMessageReceiver(const std::string &message)
+    UartMessageReceiver::UartMessageReceiver(const String &message)
         : _jsonDoc(512)
     {
         if (isUartMessage(message) == false)
@@ -17,7 +17,7 @@ namespace UartMessageInterface
             return;
         }
 
-        deserializeJson(_jsonDoc, message.c_str(), message.size() -1);
+        deserializeJson(_jsonDoc, message.c_str(), message.length() -1);
     }
 
     bool UartMessageReceiver::isMessageValid()
@@ -25,130 +25,124 @@ namespace UartMessageInterface
         return true; // TODO 내용 검사
     }
 
-    bool UartMessageReceiver::isUartMessage(const std::string &message)
+    bool UartMessageReceiver::isUartMessage(const String &message)
     {
         return true; // TODO
     }
 
     void UartMessageReceiver::processMessage()
     {
-        const XMLElement *root = _xmlDoc.RootElement();
-        if (std::string(root->Name()) == std::string("REQUEST"))
+        JsonObjectConst root = _jsonDoc.to<JsonObject>();
+
+        if(!root.containsKey("MessageType")) return;
+        String sMessageType = root["MessageType"];
+
+        if (sMessageType == String("Request"))
         {
             handleRequestMessage(root);
         }
-        else if ((std::string(root->Name()) == std::string("RESPONSE")) ||
-                 (std::string(root->Name()) == std::string("NOTIFICATION")))
+        else if ((sMessageType == String("Response")) ||
+                 (sMessageType == String("Notification")))
         {
             handleResponseMessage(root);
         }
     }
 
-    void UartMessageReceiver::handleRequestMessage(const XMLElement *root)
+    void UartMessageReceiver::handleRequestMessage(JsonObjectConst root)
     {
         // cout << "REQUEST Message arrived" << endl;
 
-        const XMLElement *command = root->FirstChildElement();
-        if (std::string(command->Value()) == std::string("GET"))
+        if (!root.containsKey("CommandType")) return;
+        String sCommandType = root["CommandType"];
+
+        if (!root.containsKey("Data")) return;
+        JsonArrayConst datas = root["Data"];
+
+        if (sCommandType == String("Get"))
         {
-            XMLElement *elem = const_cast<XMLElement *>(command->FirstChildElement());
-            while (elem != NULL)
+            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
             {
-                invokeRequestGet(elem);
-                elem = const_cast<XMLElement *>(elem->NextSiblingElement());
+                invokeRequestGet(iter->as<JsonObjectConst>());
             }
         }
-        if (std::string(command->Value()) == std::string("SUBSCRIBE"))
+        else if (sCommandType == String("Subscribe"))
         {
-            XMLElement *elem = const_cast<XMLElement *>(command->FirstChildElement());
-            while (elem != NULL)
+            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
             {
-                invokeSubscribe(elem);
-                elem = const_cast<XMLElement *>(elem->NextSiblingElement());
+                invokeSubscribe(*iter);
             }
         }
-        if (std::string(command->Value()) == std::string("UNSUBSCRIBE"))
+        else if (sCommandType == String("Unsubscribe"))
         {
-            XMLElement *elem = const_cast<XMLElement *>(command->FirstChildElement());
-            while (elem != NULL)
+            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
             {
-                invokeRequestGet(elem);
-                elem = const_cast<XMLElement *>(elem->NextSiblingElement());
+                invokeUnsubscribe(*iter);
             }
         }
     }
 
-    void UartMessageReceiver::invokeRequestGet(const XMLElement *element)
+    void UartMessageReceiver::invokeRequestGet(JsonObjectConst data)
     {
-        if (element == NULL)
-            return;
-
-        eDataType type = str2EnumDataType(element->Name());
-        std::string name = element->Attribute("NAME");
-        UartMessageCallbackManagement::invokeRequestGetCallBack(type, name);
+        eDataType dataType = str2EnumDataType(data["Type"]);
+        String name = data["Name"];
+        UartMessageCallbackManagement::invokeRequestGetCallBack(dataType, name);
     }
 
-    void UartMessageReceiver::invokeSubscribe(const XMLElement *element)
+    void UartMessageReceiver::invokeSubscribe(JsonObjectConst data)
     {
-        if (element == NULL)
-            return;
-
-        eDataType dataType = str2EnumDataType(element->Name());
-        std::string name = element->Attribute("NAME");
-        unsigned int period = element->UnsignedAttribute("PERIOD");
-
+        eDataType dataType = str2EnumDataType(data["Type"]);
+        String name = data["Name"];
+        unsigned int period = data["Period"];
         UartMessageCallbackManagement::invokeSubscribeCallBack(dataType, name, period);
     }
 
-    void UartMessageReceiver::invokeUnsubscribe(const XMLElement *element)
+    void UartMessageReceiver::invokeUnsubscribe(JsonObjectConst data)
     {
-        if (element == NULL)
-            return;
-
-        eDataType dataType = str2EnumDataType(element->Name());
-        std::string name = element->Attribute("NAME");
-
+        eDataType dataType = str2EnumDataType(data["Type"]);
+        String name = data["Name"];
         UartMessageCallbackManagement::invokeUnsubscribeCallBack(dataType, name);
     }
 
-    void UartMessageReceiver::handleResponseMessage(const XMLElement *root)
+    void UartMessageReceiver::handleResponseMessage(JsonObjectConst root)
     {
         // cout << "RESPONSE/NOTIFICATION Message arrived" << endl;
 
-        const XMLElement *command = root->FirstChildElement();
-        if (std::string(command->Value()) == std::string("GET"))
+        if (!root.containsKey("CommandType")) return;
+        String sCommandType = root["CommandType"];
+
+        if (!root.containsKey("Data")) return;
+        JsonArrayConst datas = root["Data"];
+
+        if (sCommandType == String("Get"))
         {
-            XMLElement *elem = const_cast<XMLElement *>(command->FirstChildElement());
-            while (elem != NULL)
+            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
             {
-                invokeResponseGet(elem);
-                elem = const_cast<XMLElement *>(elem->NextSiblingElement());
+                invokeResponseGet(*iter);
             }
         }
     }
 
-    void UartMessageReceiver::invokeResponseGet(const XMLElement *element)
+    void UartMessageReceiver::invokeResponseGet(JsonObjectConst data)
     {
-        if (element == NULL)
-            return;
+        eDataType dataType = str2EnumDataType(data["Type"]);
+        String name = data["Name"];
+        String sValueType = data["ValueType"];
+        eValueType valueType = (sValueType == String("Float")) ? Float : Integer;
 
-        eDataType dataType = str2EnumDataType(element->Name());
-        std::string name = element->Attribute("NAME");
-        std::string valueType = element->Attribute("TYPE");
-        if (valueType == "DOUBLE")
+        Value v;
+        if(valueType == Float)
         {
             Value v;
-            v.type = Double;
-            v.value.val_double = element->DoubleAttribute("VALUE");
-            UartMessageCallbackManagement::invokeResponseGetCallBack(dataType, name, v);
+            v.type = Float;
+            v.value.val_float = data["Value"];
         }
-        else // if(valueType == "INTEGER")
+        else
         {
-            Value v;
             v.type = Integer;
-            v.value.val_int = element->UnsignedAttribute("VALUE");
-            UartMessageCallbackManagement::invokeResponseGetCallBack(dataType, name, v);
+            v.value.val_int = data["Value"];
         }
+
+        UartMessageCallbackManagement::invokeResponseGetCallBack(dataType, name, v);
     }
 
 }; // namespace UartMessageInterface

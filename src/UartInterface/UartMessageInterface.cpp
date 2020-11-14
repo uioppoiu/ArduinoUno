@@ -5,61 +5,61 @@ namespace UartMessageInterface
 {
     eDataType str2EnumDataType(const char *input)
     {
-        std::string str(input);
-        if (str == std::string("SENSOR_ALL"))
+        String str(input);
+        if (str == String("SensorAll"))
             return SensorAll;
-        if (str == std::string("TEMPERATURE"))
+        if (str == String("SensorTemperature"))
             return SensorTemperature;
-        if (str == std::string("CO2"))
+        if (str == String("SensorCO2"))
             return SensorCO2;
-        if (str == std::string("HUMIDITY"))
+        if (str == String("SensorHumidity"))
             return SensorHumidity;
-        if (str == std::string("CONDUCTIVITY"))
+        if (str == String("SensorConductivity"))
             return SensorConductivity;
-        if (str == std::string("CONTROL_ALL"))
+        if (str == String("ControlAll"))
             return ControlAll;
-        if (str == std::string("CONTROL0"))
+        if (str == String("Control0"))
             return Control0;
-        if (str == std::string("CONTROL1"))
+        if (str == String("Control1"))
             return Control1;
-        if (str == std::string("CONTROL2"))
+        if (str == String("Control2"))
             return Control2;
-        if (str == std::string("DATETIME"))
+        if (str == String("DateTime"))
             return DateTime;
         return Invalid;
     }
 
-    std::string enum2Str(eDataType input)
+    String enum2Str(eDataType input)
     {
         switch (input)
         {
         case SensorAll:
-            return "SENSOR_ALL";
+            return "SensorAll";
         case SensorTemperature:
-            return "TEMPERATURE";
+            return "SensorTemperature";
         case SensorCO2:
-            return "CO2";
+            return "SensorCO2";
         case SensorHumidity:
-            return "HUMIDITY";
+            return "SensorHumidity";
         case SensorConductivity:
-            return "CONDUCTIVITY";
+            return "SensorConductivity";
         case ControlAll:
-            return "CONTROL_ALL";
+            return "ControlAll";
         case Control0:
-            return "CONTROL0";
+            return "Control0";
         case Control1:
-            return "CONTROL1";
+            return "Control1";
         case Control2:
-            return "CONTROL2";
+            return "Control2";
         case DateTime:
-            return "DATETIME";
+            return "DateTime";
         case Invalid:
         default:
             return "-";
         }
     }
 
-    std::string getCurrentTime()
+    String getCurrentTime()
     {
         char sResult[32] = {
             0,
@@ -71,7 +71,7 @@ namespace UartMessageInterface
         return sResult;
     }
 
-    uint8_t getCheckSum(const std::string &message)
+    uint8_t getCheckSum(const String &message)
     {
         uint8_t sum = 0;
         for (const char &c : message)
@@ -85,12 +85,12 @@ namespace UartMessageInterface
         return checkSum;
     }
 
-    void appendCheckSum(std::string &message)
+    void appendCheckSum(String &message)
     {
-        message.push_back((char)getCheckSum(message));
+        message += ((char)getCheckSum(message));
     }
 
-    bool verityCheckSum(const std::string &message)
+    bool verityCheckSum(const String &message)
     {
         uint8_t sum = 0;
         for (const char &c : message)
