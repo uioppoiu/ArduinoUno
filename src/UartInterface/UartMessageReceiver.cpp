@@ -3,7 +3,7 @@
 namespace UartMessageInterface
 {
     UartMessageReceiver::UartMessageReceiver(const String &message)
-        : _jsonDoc(512)
+        : _jsonDoc(256)
     {
         if (isUartMessage(message) == false)
         {
@@ -17,7 +17,12 @@ namespace UartMessageInterface
             return;
         }
 
-        deserializeJson(_jsonDoc, message.c_str(), message.length() -1);
+        deserializeJson(_jsonDoc, message.c_str(), message.length() - 1);
+    }
+
+    UartMessageReceiver::~UartMessageReceiver()
+    {
+        _jsonDoc.garbageCollect();
     }
 
     bool UartMessageReceiver::isMessageValid()
@@ -32,49 +37,55 @@ namespace UartMessageInterface
 
     void UartMessageReceiver::processMessage()
     {
-        JsonObjectConst root = _jsonDoc.to<JsonObject>();
-
-        if(!root.containsKey("MessageType")) return;
-        String sMessageType = root["MessageType"];
-
-        if (sMessageType == String("Request"))
+        if (!_jsonDoc.containsKey("MsgType"))
         {
-            handleRequestMessage(root);
+            return;
         }
-        else if ((sMessageType == String("Response")) ||
-                 (sMessageType == String("Notification")))
+
+        const char *sMessageType = _jsonDoc["MsgType"];
+
+        if (String(sMessageType).equals("Req"))
         {
-            handleResponseMessage(root);
+            handleRequestMessage();
+        }
+        else if ((String(sMessageType).equals("Rsp")) ||
+                 (String(sMessageType).equals("Noti")))
+        {
+            handleResponseMessage();
         }
     }
 
-    void UartMessageReceiver::handleRequestMessage(JsonObjectConst root)
+    void UartMessageReceiver::handleRequestMessage()
     {
-        // cout << "REQUEST Message arrived" << endl;
-
-        if (!root.containsKey("CommandType")) return;
-        String sCommandType = root["CommandType"];
-
-        if (!root.containsKey("Data")) return;
-        JsonArrayConst datas = root["Data"];
-
-        if (sCommandType == String("Get"))
+        if (!_jsonDoc.containsKey("Cmd"))
         {
-            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
+            return;
+        }
+        const char *sCommandType = _jsonDoc["Cmd"];
+
+        if (!_jsonDoc.containsKey("Data"))
+        {
+            return;
+        }
+        JsonArrayConst datas = _jsonDoc["Data"];
+
+        if (String(sCommandType).equals("Get"))
+        {
+            for (JsonArrayConst::iterator iter = datas.begin(); iter != datas.end(); ++iter)
             {
                 invokeRequestGet(iter->as<JsonObjectConst>());
             }
         }
-        else if (sCommandType == String("Subscribe"))
+        else if (String(sCommandType).equals("Subs"))
         {
-            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
+            for (JsonArrayConst::iterator iter = datas.begin(); iter != datas.end(); ++iter)
             {
                 invokeSubscribe(*iter);
             }
         }
-        else if (sCommandType == String("Unsubscribe"))
+        else if (String(sCommandType).equals("Unsubs"))
         {
-            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
+            for (JsonArrayConst::iterator iter = datas.begin(); iter != datas.end(); ++iter)
             {
                 invokeUnsubscribe(*iter);
             }
@@ -84,14 +95,14 @@ namespace UartMessageInterface
     void UartMessageReceiver::invokeRequestGet(JsonObjectConst data)
     {
         eDataType dataType = str2EnumDataType(data["Type"]);
-        String name = data["Name"];
+        const char *name = data["Name"];
         UartMessageCallbackManagement::invokeRequestGetCallBack(dataType, name);
     }
 
     void UartMessageReceiver::invokeSubscribe(JsonObjectConst data)
     {
         eDataType dataType = str2EnumDataType(data["Type"]);
-        String name = data["Name"];
+        const char *name = data["Name"];
         unsigned int period = data["Period"];
         UartMessageCallbackManagement::invokeSubscribeCallBack(dataType, name, period);
     }
@@ -99,23 +110,23 @@ namespace UartMessageInterface
     void UartMessageReceiver::invokeUnsubscribe(JsonObjectConst data)
     {
         eDataType dataType = str2EnumDataType(data["Type"]);
-        String name = data["Name"];
+        const char *name = data["Name"];
         UartMessageCallbackManagement::invokeUnsubscribeCallBack(dataType, name);
     }
 
-    void UartMessageReceiver::handleResponseMessage(JsonObjectConst root)
+    void UartMessageReceiver::handleResponseMessage()
     {
-        // cout << "RESPONSE/NOTIFICATION Message arrived" << endl;
+        if (!_jsonDoc.containsKey("Cmd"))
+            return;
+        const char *sCommandType = _jsonDoc["Cmd"];
 
-        if (!root.containsKey("CommandType")) return;
-        String sCommandType = root["CommandType"];
+        if (!_jsonDoc.containsKey("Data"))
+            return;
+        JsonArrayConst datas = _jsonDoc["Data"];
 
-        if (!root.containsKey("Data")) return;
-        JsonArrayConst datas = root["Data"];
-
-        if (sCommandType == String("Get"))
+        if (String(sCommandType).equals("Get"))
         {
-            for(JsonArrayConst::iterator iter = datas.begin() ; iter != datas.end() ; ++iter)
+            for (JsonArrayConst::iterator iter = datas.begin(); iter != datas.end(); ++iter)
             {
                 invokeResponseGet(*iter);
             }
@@ -125,24 +136,22 @@ namespace UartMessageInterface
     void UartMessageReceiver::invokeResponseGet(JsonObjectConst data)
     {
         eDataType dataType = str2EnumDataType(data["Type"]);
-        String name = data["Name"];
-        String sValueType = data["ValueType"];
-        eValueType valueType = (sValueType == String("Float")) ? Float : Integer;
+        const char *name = data["Name"];
+        const char *sValueType = data["ValType"];
+        eValueType valueType = (String(sValueType).equals("Float")) ? Float : Integer;
 
         Value v;
-        if(valueType == Float)
+        if (valueType == Float)
         {
-            Value v;
             v.type = Float;
-            v.value.val_float = data["Value"];
+            v.value.val_float = data["Val"];
         }
         else
         {
             v.type = Integer;
-            v.value.val_int = data["Value"];
+            v.value.val_int = data["Val"];
         }
 
         UartMessageCallbackManagement::invokeResponseGetCallBack(dataType, name, v);
     }
-
 }; // namespace UartMessageInterface

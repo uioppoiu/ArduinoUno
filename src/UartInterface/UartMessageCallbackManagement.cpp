@@ -16,7 +16,6 @@ namespace UartMessageInterface
     void UartMessageCallbackManagement::registerRequestGetCallBack(const CallBackRequestGet func)
     {
         getInstance()._callBackRequestGet = func;
-
     }
 
     void UartMessageCallbackManagement::invokeRequestGetCallBack(eDataType dataType, const String &name)

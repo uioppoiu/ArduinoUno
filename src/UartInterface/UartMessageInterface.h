@@ -52,7 +52,7 @@ namespace UartMessageInterface
     };
 
     eDataType str2EnumDataType(const char *input);
-    String enum2Str(eDataType input);
+    const char* enum2Str(eDataType input);
 
     String getCurrentTime();
 
