@@ -3,6 +3,41 @@
 
 namespace UartMessageInterface
 {
+
+    UartMessageSender::UartMessageSender(const unsigned char msgId)
+    : _header((MsgCommonHeader*)_messageBuffer);
+    {
+        memset(_messageBuffer, sizeof(_messageBuffer), 0x00);
+        _header->msgId = msgId;
+        _header->msgSize = sizeof(MsgCommonHeader);
+    }
+    
+    UartMessageSender::~UartMessageSender()
+    {}
+
+    void UartMessageSender::setSeqId(uint32_t seqId)
+    {
+        _header.seqId = seqId;
+    }
+
+    void UartMessageSender::sendMessage()
+    {
+        Serial.print("<BEGIN>");
+
+        String buf()
+        appendCheckSum(buf);
+
+        for(size_t offset = 0 ; offset < buf.length() ; )
+        {
+            size_t end = (offset + 64 <= buf.length()) ? offset + 64 : buf.length();
+            Serial.print(buf.substring(offset, end));
+            offset = end;
+        }
+
+        Serial.print("<END>");
+    }
+
+
     UartMessageSender::UartMessageSender(eMessageType messageType, eCommandType commandType)
         : _seqId(0), _jsonDoc(256)
     {

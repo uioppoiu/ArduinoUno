@@ -1,5 +1,3 @@
-#include <ArduinoJson.h>
-
 #include "src/UartInterface/UartMessageInterface.h"
 #include "src/UartInterface/UartMessageCallbackManagement.h"
 #include "src/UartInterface/UartMessageSender.h"
