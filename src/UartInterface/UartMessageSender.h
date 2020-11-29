@@ -20,7 +20,7 @@ namespace UartMessageInterface
 
         // Response
         template<typename VALUE_TYPE>
-        void appendResponse(eDataType dataType, const String &name, const VALUE_TYPE &value, eValueType valueType)
+        void appendResponse(eDataType dataType, const String &name, eValueType valueType, const VALUE_TYPE &value)
         {
             if (!_jsonDoc.containsKey("Data"))
             {
@@ -32,16 +32,16 @@ namespace UartMessageInterface
             switch (dataType)
             {
             case SensorTemperature:
-                data["Type"] = "SensorTemperature";
+                data["Type"] = "Temp";
                 break;
             case SensorCO2:
-                data["Type"] = "SensorCO2";
+                data["Type"] = "CO2";
                 break;
             case SensorHumidity:
-                data["Type"] = "SensorHumidity";
+                data["Type"] = "Humid";
                 break;
             case SensorConductivity:
-                data["Type"] = "SensorConductivity";
+                data["Type"] = "Conduct";
                 break;
             case Control1:
                 data["Type"] = "Control1";
@@ -60,14 +60,22 @@ namespace UartMessageInterface
 
             if (valueType == Float)
             {
-                data["ValueType"] = "Float";
-                data["Value"] = (float)value;
+                data["ValType"] = "Float";
+                data["Val"] = (float)value;
+
             }
             else // Integer
             {
-                data["ValueType"] = "Integer";
-                data["Value"] = (int)value;
+                data["ValType"] = "Integer";
+                data["Val"] = (int)value;
             }
+        }
+
+        // Notification
+        template<typename VALUE_TYPE>
+        void appendNofication(eDataType dataType, const String &name, eValueType valueType, const VALUE_TYPE &value)
+        {
+            appendResponse(dataType, name, valueType, value);
         }
 
         // Subscribe
@@ -78,7 +86,10 @@ namespace UartMessageInterface
         void appendUnsubscribe(eDataType type, const String &name); // All 이면 return;
         void appendUnsubscribeAll(eDataType type);                  // 나머지 비우고 All로
 
-        void sendMessage();
+        // Acknowledge
+        void appendAcknowledge(eDataType type, const String &name);
+
+        String sendMessage();
 
     private:
         unsigned int _seqId;

@@ -9,16 +9,16 @@ namespace UartMessageInterface
         switch (messageType)
         {
         case Request:
-            _jsonDoc["MessageType"] = "Request";
+            _jsonDoc["MsgType"] = "Req";
             break;
         case Response:
-            _jsonDoc["MessageType"] = "Response";
+            _jsonDoc["MsgType"] = "Rsp";
             break;
         case Notification:
-            _jsonDoc["MessageType"] = "Notification";
+            _jsonDoc["MsgType"] = "Noti";
             break;
         case Acknowledge:
-            _jsonDoc["MessageType"] = "Acknowledge";
+            _jsonDoc["MsgType"] = "Ack";
             break;
         default:
             // throw invalid_argument("Invalid MessageType");
@@ -28,16 +28,16 @@ namespace UartMessageInterface
         switch (commandType)
         {
         case Get:
-            _jsonDoc["CommandType"] = "Get";
+            _jsonDoc["Cmd"] = "Get";
             break;
         case Set:
-            _jsonDoc["CommandType"] = "Set";
+            _jsonDoc["Cmd"] = "Set";
             break;
         case Subscribe:
-            _jsonDoc["CommandType"] = "Subscribe";
+            _jsonDoc["Cmd"] = "Subs";
             break;
         case Unsubscribe:
-            _jsonDoc["CommandType"] = "Unsubscribe";
+            _jsonDoc["Cmd"] = "Unsubs";
             break;
         default:
             // throw invalid_argument("Invalid CommandType");
@@ -62,7 +62,7 @@ namespace UartMessageInterface
         if (type == SensorAll)
             data["Type"] = "SensorAll";
         else if (type == ControlAll)
-            data["Type"] = "ControlAll";
+            data["Type"] = "CtrlAll";
     }
 
     void UartMessageSender::appendRequest(eDataType dataType, const String &name)
@@ -77,16 +77,16 @@ namespace UartMessageInterface
         switch (dataType)
         {
         case SensorTemperature:
-            data["Type"] = "SensorTemperature";
+            data["Type"] = "Temp";
             break;
         case SensorCO2:
-            data["Type"] = "SensorCO2";
+            data["Type"] = "CO2";
             break;
         case SensorHumidity:
-            data["Type"] = "SensorHumidity";
+            data["Type"] = "Humid";
             break;
         case SensorConductivity:
-            data["Type"] = "SensorConductivity";
+            data["Type"] = "Conduct";
             break;
         case Control1:
             data["Type"] = "Control1";
@@ -119,16 +119,16 @@ namespace UartMessageInterface
         switch (dataType)
         {
         case SensorTemperature:
-            data["Type"] = "SensorTemperature";
+            data["Type"] = "Temp";
             break;
         case SensorCO2:
-            data["Type"] = "SensorCO2";
+            data["Type"] = "CO2";
             break;
         case SensorHumidity:
-            data["Type"] = "SensorHumidity";
+            data["Type"] = "Humid";
             break;
         case SensorConductivity:
-            data["Type"] = "SensorConductivity";
+            data["Type"] = "Conduct";
             break;
         case Control1:
             data["Type"] = "Control1";
@@ -162,7 +162,7 @@ namespace UartMessageInterface
         if (dataType == SensorAll)
             data["Type"] = "SensorAll";
         else if (dataType == ControlAll)
-            data["Type"] = "ControlAll";
+            data["Type"] = "CtrlAll";
 
         data["Period"] = period;        
     }
@@ -179,16 +179,16 @@ namespace UartMessageInterface
         switch (dataType)
         {
         case SensorTemperature:
-            data["Type"] = "SensorTemperature";
+            data["Type"] = "Temp";
             break;
         case SensorCO2:
-            data["Type"] = "SensorCO2";
+            data["Type"] = "CO2";
             break;
         case SensorHumidity:
-            data["Type"] = "SensorHumidity";
+            data["Type"] = "Humid";
             break;
         case SensorConductivity:
-            data["Type"] = "SensorConductivity";
+            data["Type"] = "Conduct";
             break;
         case Control1:
             data["Type"] = "Control1";
@@ -221,16 +221,55 @@ namespace UartMessageInterface
         if (dataType == SensorAll)
             data["Type"] = "SensorAll";
         else if (dataType == ControlAll)
-            data["Type"] = "ControlAll";
+            data["Type"] = "CtrlAll";
     }
 
-    void UartMessageSender::sendMessage()
+        void UartMessageSender::appendAcknowledge(eDataType dataType, const String &name)
+    {
+        if (!_jsonDoc.containsKey("Data"))
+        {
+            _jsonDoc.createNestedArray("Data");
+        }
+
+        JsonArray dataArr = _jsonDoc.getMember("Data");
+        JsonObject data = dataArr.createNestedObject();
+        switch (dataType)
+        {
+        case SensorTemperature:
+            data["Type"] = "Temp";
+            break;
+        case SensorCO2:
+            data["Type"] = "CO2";
+            break;
+        case SensorHumidity:
+            data["Type"] = "Humid";
+            break;
+        case SensorConductivity:
+            data["Type"] = "Conduct";
+            break;
+        case Control1:
+            data["Type"] = "Control1";
+            break;
+        case Control2:
+            data["Type"] = "Control2";
+            break;
+        case DateTime:
+            data["Type"] = "DateTime";
+            break;
+        default:
+            return;
+        }
+        data["Name"] = name;
+    }
+
+    String UartMessageSender::sendMessage()
     {
         String buf;
         serializeJson(_jsonDoc, buf);
         appendCheckSum(buf);
 
-        Serial.println(buf.c_str());
+        return buf;
+        // Serial.println(buf.c_str());
 
         _jsonDoc.garbageCollect();
     }

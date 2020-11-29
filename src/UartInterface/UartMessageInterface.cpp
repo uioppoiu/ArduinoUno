@@ -6,45 +6,45 @@ namespace UartMessageInterface
     eDataType str2EnumDataType(const char *input)
     {
         String str(input);
-        if (str == String("SensorAll"))
+        if (str.equals("SensorAll"))
             return SensorAll;
-        if (str == String("SensorTemperature"))
+        if (str.equals("Temp"))
             return SensorTemperature;
-        if (str == String("SensorCO2"))
+        if (str.equals("CO2"))
             return SensorCO2;
-        if (str == String("SensorHumidity"))
+        if (str.equals("Humid"))
             return SensorHumidity;
-        if (str == String("SensorConductivity"))
+        if (str.equals("Conduct"))
             return SensorConductivity;
-        if (str == String("ControlAll"))
+        if (str.equals("CtrlAll"))
             return ControlAll;
-        if (str == String("Control0"))
+        if (str.equals("Control0"))
             return Control0;
-        if (str == String("Control1"))
+        if (str.equals("Control1"))
             return Control1;
-        if (str == String("Control2"))
+        if (str.equals("Control2"))
             return Control2;
-        if (str == String("DateTime"))
+        if (str.equals("DateTime"))
             return DateTime;
         return Invalid;
     }
 
-    String enum2Str(eDataType input)
+    const char* enum2Str(eDataType input)
     {
         switch (input)
         {
         case SensorAll:
             return "SensorAll";
         case SensorTemperature:
-            return "SensorTemperature";
+            return "Temp";
         case SensorCO2:
-            return "SensorCO2";
+            return "CO2";
         case SensorHumidity:
-            return "SensorHumidity";
+            return "Humid";
         case SensorConductivity:
-            return "SensorConductivity";
+            return "Conduct";
         case ControlAll:
-            return "ControlAll";
+            return "CtrlAll";
         case Control0:
             return "Control0";
         case Control1:

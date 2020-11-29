@@ -12,6 +12,8 @@ namespace UartMessageInterface
     {
     public:
         UartMessageReceiver(const String &message);
+        ~UartMessageReceiver();
+        
         bool isMessageValid();
         void processMessage();
 
@@ -21,11 +23,12 @@ namespace UartMessageInterface
 
         bool isUartMessage(const String &message);
 
-        void handleRequestMessage(JsonObjectConst root);
+        void handleRequestMessage();
         void invokeRequestGet(JsonObjectConst data);
         void invokeSubscribe(JsonObjectConst data);
         void invokeUnsubscribe(JsonObjectConst data);
-        void handleResponseMessage(JsonObjectConst root);
+
+        void handleResponseMessage();
         void invokeResponseGet(JsonObjectConst data);
 
         // TODO Set

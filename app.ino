@@ -5,35 +5,30 @@
 #include "src/UartInterface/UartMessageSender.h"
 #include "src/UartInterface/UartMessageReceiver.h"
 
-void onRequestTemp1(UartMessageInterface::eDataType type, const String &name)
+void onRequestTemp(UartMessageInterface::eDataType type, const String &name)
 {
-    Serial.println("onRequestTemp1");
+    Serial.println("onRequestTemp");
     Serial.println(type);
+
+    // // Get Response Message 전달
+    // UartMessageInterface::UartMessageSender rspTemp(UartMessageInterface::Response, UartMessageInterface::Get);
+    // rspTemp.appendResponse(UartMessageInterface::SensorTemperature, "ROOM", UartMessageInterface::Float, 25.5);
+    // rspTemp.appendResponse(UartMessageInterface::SensorCO2, "ROOM", UartMessageInterface::Integer, 234);
+    // rspTemp.appendResponse(UartMessageInterface::SensorTemperature, "WATER", UartMessageInterface::Integer, 456);
+    // String msgRsp = rspTemp.sendMessage();
+    // Serial.println(msgRsp);
 }
 
-void onRequestTemp2(UartMessageInterface::eDataType type, const String &name)
+void onResponseTemp(UartMessageInterface::eDataType type, const String &name, const UartMessageInterface::Value &value)
 {
-    Serial.println("onRequestTemp2");
-    Serial.println(type);
-}
-
-void onResponseTemp1(UartMessageInterface::eDataType type, const String &name, const UartMessageInterface::Value &value)
-{
-    Serial.println("onResponseTemp1");
+    Serial.println("onResponseTemp");
     Serial.println(type);
     // cout << name << endl;
     // cout << value.type << endl;
     // cout << value.value.val_double << endl;
 }
 
-void onResponseTemp2(UartMessageInterface::eDataType type, const String &name, const UartMessageInterface::Value &value)
-{
-    Serial.println("onResponseTemp2");
-    Serial.println(type);
-    // cout << name << endl;
-    // cout << value.type << endl;
-    // cout << value.value.val_int << endl;
-}
+String readBuffer;
 
 void setup()
 {
@@ -43,53 +38,56 @@ void setup()
     // initialize digital pin LED_BUILTIN as an output.
     pinMode(LED_BUILTIN, OUTPUT);
 
+    readBuffer = "";
+
     // Example
     // Callback 등록 (Get Request)
-    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(onRequestTemp1);
-    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(onRequestTemp1);
+    UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(onRequestTemp);
 
     // Callback 등록 (Get Response)
-    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(onResponseTemp2);
-    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(onResponseTemp2);
-
-
+    UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(onResponseTemp);
 }
+
 
 // the loop function runs over and over again forever
 void loop()
 {
-    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
-    delay(2000);                      // wait for a second
-    digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
-    delay(2000);                      // wait for a second
+    // digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
+    // delay(2000);                      // wait for a second
+    // digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
+    // delay(2000);                      // wait for a second
 
-    // if (Serial.available())
-    // {
-    //     String str = Serial.readString();
-    //     Serial.println(str);
-    // }
+    int size = Serial.available();
+    if (size > 0)
+    {
+        char buf[64] = {0,};
+        Serial.readBytes(buf, 
+        String buf = Serial.readString();
+        if(buf.startsWith("<BEGIN>"))
+        {
+            readBuffer = "";
+            readBuffer += buf.substring(7);
+            Serial.print("BEGIN:");
+            Serial.println(readBuffer);
+        }
+        else if(buf.endsWith("<END>"));
+        {
+            .
+            Serial.print("READ:");
+            Serial.println(readBuffer);
+        }
+        else
+        {
+            readBuffer += buf;
+        }
 
-    // Get Response Message 전달
-    UartMessageInterface::UartMessageSender rspTemp(UartMessageInterface::Response, UartMessageInterface::Get);
-    rspTemp.appendResponse(UartMessageInterface::SensorTemperature, "ROOM", 25.5, UartMessageInterface::Float);
-    rspTemp.appendResponse(UartMessageInterface::SensorCO2, "ROOM", 123, UartMessageInterface::Integer);
-    rspTemp.appendResponse(UartMessageInterface::SensorTemperature, "WATER", 19.0, UartMessageInterface::Integer);
-    rspTemp.sendMessage();
-    // Serial.print(String(msgRsp.c_str()));
-
-    // // Get Responses Message 처리
-    // UartMessageInterface::UartMessageReceiver rcvRsp(msgRsp);
-    // rcvRsp.processMessage();
-
-    // Get Request Message 전달
-    UartMessageInterface::UartMessageSender reqTemp(UartMessageInterface::Request, UartMessageInterface::Get);
-    reqTemp.appendRequest(UartMessageInterface::SensorTemperature, "ROOM");
-    reqTemp.appendRequest(UartMessageInterface::SensorTemperature, "WATER");
-    reqTemp.appendRequest(UartMessageInterface::SensorCO2, "ROOM");
-    reqTemp.sendMessage();
-    // Serial.print(String(msgReq.c_str()));
-
-    // // Get Request Message 처리
-    // UartMessageInterface::UartMessageReceiver rcvReq(msgReq);
-    // rcvReq.processMessage();
+        // // Get Request Message 처리
+        // UartMessageInterface::UartMessageReceiver rcvReq(str);
+        // rcvReq.processMessage();
+    }
 }
+
+// void serialEvent()
+// {
+//     Serial.println(Serial.readString());
+// }
