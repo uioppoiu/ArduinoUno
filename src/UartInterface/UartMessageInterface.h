@@ -10,25 +10,26 @@ namespace UartMessageInterface
     String getCurrentTime();
 
     uint8_t getCheckSum(const String &message);
+    char getCheckSum(const char* str, size_t strSize);
     void appendCheckSum(String &message);
     bool verityCheckSum(const String &message);
 
     typedef struct {
         unsigned char msgId; // 메시지 ID
         unsigned char msgSize; // 헤더를 포함한 메시지 크기
-        uint32_t seqId;
         unsigned char numOfData; // 데이터의 수
         unsigned char sizeOfData; // 각 데이터의 사이즈
+        uint32_t seqId;
     } MsgCommonHeader;
 
     typedef struct {
         unsigned char type;
-        char name[9];
+        char name[11];
     } RequestGetData, SubscribeData, UnsubscribeData;
 
     typedef struct {
         unsigned char type;
-        char name[9];
+        char name[11];
         uint32_t value;
     } ResponseGetData, RequestSetData, NotificationData;
 
@@ -57,7 +58,7 @@ namespace UartMessageInterface
         static const unsigned char Control1 = 0x11;
         static const unsigned char Control2 = 0x12;
         static const unsigned char Control3 = 0x13;
-        static const unsigned char DateTime = 0x20,
+        static const unsigned char DateTime = 0x20;
     };
 
 }; // namespace UartMessageInterface

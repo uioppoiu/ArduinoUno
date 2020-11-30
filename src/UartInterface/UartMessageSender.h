@@ -18,21 +18,28 @@ namespace UartMessageInterface
         template<typename T>
         void appendData(const T& data)
         {
-            if (_header.sizeOfData != 0)
+            if (_header->sizeOfData != 0)
             {
-                if (_header.sizeOfData != sizeof(T))
+                if (_header->sizeOfData != sizeof(T))
                 {
                     // 호환이 안 되는 Data type을 섞어서 append할 수 없다.
                     return;
                 }
             }
 
-            memcpy(_messageBuffer + sizeof(MsgCommonHeader) + (_header.numOfData * _header.sizeOfData), &data, sizeof(T));
+            memcpy(_messageBuffer + sizeof(MsgCommonHeader) + (_header->numOfData * _header->sizeOfData), &data, sizeof(T));
 
-            _header.msgSize += sizeof(T);
-            _header.numOfData += 1;
-            _header.sizeOfData = sizeof(T);
+            _header->msgSize += sizeof(T);
+            _header->numOfData += 1;
+            _header->sizeOfData = sizeof(T);
         }
+
+        void appendRequestGetData(unsigned char dataType, const char* name, size_t sizeOfName);
+        void appendResponseGetData(unsigned char dataType, const char* name, size_t sizeOfName, uint32_t value);
+        void appendNotificationData(unsigned char dataType, const char* name, size_t sizeOfName, uint32_t value);
+        void appendRequestSetData(unsigned char dataType, const char* name, size_t sizeOfName, uint32_t value);
+        void appendSubscribeData(unsigned char dataType, const char* name, size_t sizeOfName);
+        void appendUnsubscribeData(unsigned char dataType, const char* name, size_t sizeOfName);
 
         void sendMessage();
 
