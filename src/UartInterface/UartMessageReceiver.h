@@ -10,14 +10,14 @@ namespace UartMessageInterface
     class UartMessageReceiver
     {
     public:
-        UartMessageReceiver(const char* msg, size_t msgSize);
+        UartMessageReceiver(const uint8_t* msg, size_t msgSize);
         ~UartMessageReceiver();
         
         bool isMessageValid();
         void processMessage();
 
     private:
-        char _message[128];
+        uint8_t _message[128];
         UartMessageReceiver();
     };
 

@@ -1,5 +1,6 @@
 #include <time.h>
 #include "UartMessageInterface.h"
+#include "UartEndian.h"
 
 namespace UartMessageInterface
 {
@@ -87,6 +88,16 @@ namespace UartMessageInterface
 
         // cout << "Verity : " << (sum == 0) << endl;
         return (sum == 0);
+    }
+
+    void writeEndian(ResponseGetData* data)
+    {
+        data->value = htonl(data->value);
+    }
+
+    void readEndian(ResponseGetData* data)
+    {
+        data->value = ntohl(data->value);
     }
 
 }; // namespace UartMessageInterface

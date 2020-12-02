@@ -5,29 +5,23 @@
 
 namespace UartMessageInterface
 {
-    const char* DataTypeStr(const unsigned char input);
-
-    String getCurrentTime();
-
-    uint8_t getCheckSum(const String &message);
-    uint8_t getCheckSum(const uint8_t* str, size_t strSize);
-    void appendCheckSum(String &message);
-    bool verityCheckSum(const String &message);
-
-    typedef struct {
-        uint8_t msgId; // 메시지 ID
-        uint8_t msgSize; // 헤더를 포함한 메시지 크기
-        uint8_t numOfData; // 데이터의 수
+    typedef struct
+    {
+        uint8_t msgId;      // 메시지 ID
+        uint8_t msgSize;    // 헤더를 포함한 메시지 크기
+        uint8_t numOfData;  // 데이터의 수
         uint8_t sizeOfData; // 각 데이터의 사이즈
         uint32_t seqId;
     } MsgCommonHeader;
 
-    typedef struct {
+    typedef struct
+    {
         uint8_t type;
         char name[11];
     } RequestGetData, SubscribeData, UnsubscribeData;
 
-    typedef struct {
+    typedef struct
+    {
         uint8_t type;
         char name[11];
         uint32_t value;
@@ -60,6 +54,19 @@ namespace UartMessageInterface
         static const uint8_t Control3 = 0x13;
         static const uint8_t DateTime = 0x20;
     };
+
+    const char *DataTypeStr(const unsigned char input);
+
+    String getCurrentTime();
+
+    uint8_t getCheckSum(const String &message);
+    uint8_t getCheckSum(const uint8_t *str, size_t strSize);
+    void appendCheckSum(String &message);
+    bool verityCheckSum(const String &message);
+
+    // Endian 처리
+    void writeEndian(ResponseGetData *data); // hton
+    void readEndian(ResponseGetData *data);  // ntoh
 
 }; // namespace UartMessageInterface
 

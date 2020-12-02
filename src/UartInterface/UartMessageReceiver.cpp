@@ -1,8 +1,9 @@
 #include "UartMessageReceiver.h"
+#include "UartEndian.h"
 
 namespace UartMessageInterface
 {
-    UartMessageReceiver::UartMessageReceiver(const char* msg, size_t msgSize)
+    UartMessageReceiver::UartMessageReceiver(const uint8_t* msg, size_t msgSize)
     {
         memcpy(_message, msg, msgSize);
         // if (verityCheckSum(message) == false) throw;
@@ -15,9 +16,14 @@ namespace UartMessageInterface
     void UartMessageReceiver::processMessage()
     {
         const MsgCommonHeader *msgHeader = (const MsgCommonHeader *)_message;
-        const unsigned char msgId = msgHeader->msgId; // 메시지 ID
-        const uint32_t seqId = msgHeader->seqId;
-        const unsigned char numOfData = msgHeader->numOfData; // 데이터의 수
+        const uint8_t msgId = msgHeader->msgId; // 메시지 ID
+        const uint32_t seqId = ntohl(msgHeader->seqId);
+        const uint8_t numOfData = msgHeader->numOfData; // 데이터의 수
+
+        Serial.print("MsgId:0x");
+        Serial.print(msgId,16);
+        Serial.print(" SeqId:");
+        Serial.println(seqId);
 
         switch (msgId)
         {
