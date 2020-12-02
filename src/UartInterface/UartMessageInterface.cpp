@@ -58,18 +58,18 @@ namespace UartMessageInterface
         return checkSum;
     }
 
-    char getCheckSum(const char* str, size_t strSize)
+    uint8_t getCheckSum(const uint8_t* str, size_t strSize)
     {
         uint8_t sum = 0;
         for(size_t idx = 0 ; idx < strSize ; idx++)
         {
-            sum = sum + (uint8_t)str[idx];
+            sum = sum + str[idx];
         }
 
         uint8_t checkSum = (sum ^ 0xFF) + 1;
 
         // cout << "CheckSum : " << (int)checkSum << endl;
-        return (char)checkSum;
+        return checkSum;
     }
 
     void appendCheckSum(String &message)

@@ -71,8 +71,9 @@ void onAcknowledge(uint32_t seqId, unsigned char msgId)
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(9600);
     Serial.println("Serial OK...");
+    Serial.flush();
 
     // initialize digital pin LED_BUILTIN as an output.
     pinMode(LED_BUILTIN, OUTPUT);
@@ -101,22 +102,25 @@ void loop()
 
     while (Serial.available() > 0)
     {
-        char c = (char)Serial.read();
+        int c = Serial.read();
         readBuffer[readBufferIdx] = c;
 
         // Serial.print("Char:");
         // Serial.println(readBuffer[readBufferIdx]);
         // Serial.print("Raw:");
         // Serial.println((int)readBuffer[readBufferIdx]);
-        Serial.print(readBuffer[readBufferIdx]);
+        Serial.println((unsigned int)readBuffer[readBufferIdx], 10);
+        // Serial.print(" ");
+        // Serial.println((char)readBuffer[readBufferIdx]);
+        readBufferIdx++;
 
         // bool isBegin = false;
-        // if(readBufferIdx >= (sizeof("<BEGIN>") - 1))
+        // if(readBufferIdx >= 7)
         // {
         //     if (memcmp(
-        //             (readBuffer + readBufferIdx) - (sizeof("<BEGIN>") - 1),
+        //             readBuffer + readBufferIdx - 7,
         //             "<BEGIN>",
-        //             (sizeof("<BEGIN>") - 1)) == 0)
+        //             7) == 0)
         //     {
         //         isBegin = true;
         //     }
@@ -124,6 +128,7 @@ void loop()
 
         // if (isBegin)
         // {
+        //     Serial.println("BEGIN FOUND!!");
         //     memset(readBuffer, 0x00, sizeof(readBuffer));
         //     readBufferIdx = 0;
 
@@ -154,11 +159,12 @@ void loop()
         //     continue;
         // }
 
-        readBufferIdx++;
         if(readBufferIdx == 1024)
         {
             memset(readBuffer, 0x00, sizeof(readBuffer));
             readBufferIdx = 0;
         }
     }
+
+    Serial.flush();
 }

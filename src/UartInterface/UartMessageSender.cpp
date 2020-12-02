@@ -22,43 +22,27 @@ namespace UartMessageInterface
 
     void UartMessageSender::sendMessage()
     {
-        Serial.write("<BEGIN>", sizeof("<BEGIN>"));
-
-        char checkSum = getCheckSum(_messageBuffer, _header->msgSize);
+        uint8_t checkSum = getCheckSum(_messageBuffer, _header->msgSize);
         _messageBuffer[_header->msgSize] = checkSum;
         _header->msgSize += 1;
 
-        // Serial.printf("CheckSum:%u\n", checkSum);
-        // Serial.printf("MsgId:%u MsgSize:%u\n", _header->msgId, _header->msgSize);
-        // const RequestGetData* data = (const RequestGetData*)(_messageBuffer + sizeof(MsgCommonHeader));
-        // Serial.printf("Type:%u Name:%s\n", data[0].type, data[0].name);
-        // Serial.printf("Type:%u Name:%s\n", data[1].type, data[1].name);
-        // Serial.printf("Type:%u Name:%s\n", data[2].type, data[2].name);
-        
+        Serial.write("<BEGIN>");
         Serial.write(_messageBuffer, _header->msgSize);
+        Serial.write("<END>");
 
-        // for(size_t offset = 0 ; offset < _header->msgSize ; )
-        // {
-        //     size_t size = ((_header->msgSize - offset) > 64) ? 64 : (_header->msgSize - offset);
-        //     Serial.write(_messageBuffer + offset, size);
-        //     offset += size;
-        // }
-
-        Serial.write("<END>", sizeof("<END>"));
+        Serial.flush();
     }
 
     void UartMessageSender::appendRequestGetData(unsigned char dataType, const char *name, size_t sizeOfName)
     {
         RequestGetData data;
+        memset(&data, 0x00, sizeof(RequestGetData));
 
         data.type = dataType;
 
         memset(data.name, 0x00, sizeof(data.name));
-
-        size_t strSize = (sizeOfName > sizeof(data.name) - 1) ? (sizeof(data.name) - 1) : sizeOfName;
+        size_t strSize = (sizeOfName > sizeof(data.name)) ? (sizeof(data.name)) : sizeOfName;
         memcpy(data.name, name, strSize);
-
-        // Serial.printf("DataType:%u, Name:%s\n", dataType, name);
 
         appendData(data);
     }
@@ -66,12 +50,12 @@ namespace UartMessageInterface
     void UartMessageSender::appendResponseGetData(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value)
     {
         ResponseGetData data;
+        memset(&data, 0x00, sizeof(ResponseGetData));
 
         data.type = dataType;
 
         memset(data.name, 0x00, sizeof(data.name));
-
-        size_t strSize = (sizeOfName > sizeof(data.name) - 1) ? (sizeof(data.name) - 1) : sizeOfName;
+        size_t strSize = (sizeOfName > sizeof(data.name)) ? (sizeof(data.name)) : sizeOfName;
         memcpy(data.name, name, strSize);
 
         data.value = value;
