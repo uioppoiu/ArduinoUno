@@ -1,23 +1,25 @@
 #include "Arduino.h"
 #include "UartMessageSender.h"
+#include "UartEndian.h"
 
 namespace UartMessageInterface
 {
 
     UartMessageSender::UartMessageSender(const unsigned char msgId)
-    : _header((MsgCommonHeader*)_messageBuffer)
+        : _header((MsgCommonHeader *)_messageBuffer)
     {
         memset(_messageBuffer, 0x00, sizeof(_messageBuffer));
         _header->msgId = msgId;
         _header->msgSize = sizeof(MsgCommonHeader);
     }
-    
+
     UartMessageSender::~UartMessageSender()
-    {}
+    {
+    }
 
     void UartMessageSender::setSeqId(uint32_t seqId)
     {
-        _header->seqId = seqId;
+        _header->seqId = htonl(seqId);
     }
 
     void UartMessageSender::sendMessage()
@@ -33,7 +35,7 @@ namespace UartMessageInterface
         Serial.flush();
     }
 
-    void UartMessageSender::appendRequestGetData(unsigned char dataType, const char *name, size_t sizeOfName)
+    void UartMessageSender::appendRequestGetDataCommon(unsigned char dataType, const char *name, size_t sizeOfName)
     {
         RequestGetData data;
         memset(&data, 0x00, sizeof(RequestGetData));
@@ -47,7 +49,31 @@ namespace UartMessageInterface
         appendData(data);
     }
 
-    void UartMessageSender::appendResponseGetData(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value)
+    void UartMessageSender::appendRequestGetData(unsigned char dataType, const char *name, size_t sizeOfName)
+    {
+        if (_header->msgId != UartMessageInterface::MsgId::RequestGet)
+            return;
+
+        appendRequestGetDataCommon(dataType, name, sizeOfName);
+    }
+
+    void UartMessageSender::appendSubscribeData(unsigned char dataType, const char *name, size_t sizeOfName)
+    {
+        if (_header->msgId != UartMessageInterface::MsgId::Subscribe)
+            return;
+
+        appendRequestGetDataCommon(dataType, name, sizeOfName);
+    }
+
+    void UartMessageSender::appendUnsubscribeData(unsigned char dataType, const char *name, size_t sizeOfName)
+    {
+        if (_header->msgId != UartMessageInterface::MsgId::Unsubscribe)
+            return;
+
+        appendRequestGetDataCommon(dataType, name, sizeOfName);
+    }
+
+    void UartMessageSender::appendResponseGetDataCommon(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value)
     {
         ResponseGetData data;
         memset(&data, 0x00, sizeof(ResponseGetData));
@@ -58,29 +84,33 @@ namespace UartMessageInterface
         size_t strSize = (sizeOfName > sizeof(data.name)) ? (sizeof(data.name)) : sizeOfName;
         memcpy(data.name, name, strSize);
 
-        data.value = value;
+        data.value = htonl(value);
 
         appendData(data);
     }
 
+    void UartMessageSender::appendResponseGetData(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value)
+    {
+        if (_header->msgId != UartMessageInterface::MsgId::ResponseGet)
+            return;
+
+        appendResponseGetDataCommon(dataType, name, sizeOfName, value);
+    }
+
     void UartMessageSender::appendNotificationData(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value)
     {
-        appendResponseGetData(dataType, name, sizeOfName, value);
+        if (_header->msgId != UartMessageInterface::MsgId::Notification)
+            return;
+
+        appendResponseGetDataCommon(dataType, name, sizeOfName, value);
     }
 
     void UartMessageSender::appendRequestSetData(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value)
     {
-        appendResponseGetData(dataType, name, sizeOfName, value);
-    }
+        if (_header->msgId != UartMessageInterface::MsgId::RequestSet)
+            return;
 
-    void UartMessageSender::appendSubscribeData(unsigned char dataType, const char *name, size_t sizeOfName)
-    {
-        appendRequestGetData(dataType, name, sizeOfName);
-    }
-
-    void UartMessageSender::appendUnsubscribeData(unsigned char dataType, const char *name, size_t sizeOfName)
-    {
-        appendRequestGetData(dataType, name, sizeOfName);
+        appendResponseGetDataCommon(dataType, name, sizeOfName, value);
     }
 
 }; // namespace UartMessageInterface

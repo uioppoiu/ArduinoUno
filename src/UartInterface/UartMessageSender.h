@@ -36,12 +36,15 @@ namespace UartMessageInterface
             _header->numOfData += 1;
         }
 
+        void appendRequestGetDataCommon(unsigned char dataType, const char *name, size_t sizeOfName);
         void appendRequestGetData(unsigned char dataType, const char* name, size_t sizeOfName);
+        void appendSubscribeData(unsigned char dataType, const char* name, size_t sizeOfName);
+        void appendUnsubscribeData(unsigned char dataType, const char* name, size_t sizeOfName);
+
+        void appendResponseGetDataCommon(unsigned char dataType, const char *name, size_t sizeOfName, uint32_t value);
         void appendResponseGetData(unsigned char dataType, const char* name, size_t sizeOfName, uint32_t value);
         void appendNotificationData(unsigned char dataType, const char* name, size_t sizeOfName, uint32_t value);
         void appendRequestSetData(unsigned char dataType, const char* name, size_t sizeOfName, uint32_t value);
-        void appendSubscribeData(unsigned char dataType, const char* name, size_t sizeOfName);
-        void appendUnsubscribeData(unsigned char dataType, const char* name, size_t sizeOfName);
 
         void sendMessage();
 
