@@ -3,8 +3,7 @@
 #include "src/UartInterface/UartMessageSender.h"
 #include "src/UartInterface/UartMessageReceiver.h"
 
-
-void onRequestGet(uint32_t seqId, const UartMessageInterface::RequestGetData* dataArr, size_t arrSize)
+void onRequestGet(uint32_t seqId, const UartMessageInterface::RequestGetData *dataArr, size_t arrSize)
 {
     // Serial.println(__FUNCTION__);
     // for(size_t arrIdx = 0 ; arrIdx < arrSize ; arrIdx++)
@@ -19,55 +18,36 @@ void onRequestGet(uint32_t seqId, const UartMessageInterface::RequestGetData* da
     // }
 }
 
-void onResponseGet(uint32_t seqId, const UartMessageInterface::ResponseGetData* dataArr, size_t arrSize)
+void onResponseGet(uint32_t seqId, const UartMessageInterface::ResponseGetData *dataArr, size_t arrSize)
 {
-    // Serial.println(__FUNCTION__);
-    // for(size_t arrIdx = 0 ; arrIdx < arrSize ; arrIdx++)
-    // {
-    //     const UartMessageInterface::ResponseGetData& data = dataArr[arrIdx];
-    //     Serial.print("SeqId:");
-    //     Serial.print(seqId);
-    //     Serial.print(" Type:");
-    //     Serial.print((uint32_t)data.type);
-    //     Serial.print(" Name:");
-    //     Serial.print(data.name);
-    //     Serial.print(" Value:");
-    //     Serial.println(data.value);
-    // }
-}
+    static bool ledstate = false;
+    digitalWrite(LED_BUILTIN, ledstate);
+    ledstate = !ledstate;
 
-void onNotification(uint32_t seqId, const UartMessageInterface::NotificationData* dataArr, size_t arrSize)
-{
     Serial.println(__FUNCTION__);
-    onNotification(seqId, dataArr, arrSize);
+    for(size_t arrIdx = 0 ; arrIdx < arrSize ; arrIdx++)
+    {
+        const UartMessageInterface::ResponseGetData& data = dataArr[arrIdx];
+        Serial.print("SeqId:");
+        Serial.print(seqId);
+        Serial.print(" Type:");
+        Serial.print((uint32_t)data.type);
+        Serial.print(" Name:");
+        Serial.print(data.name);
+        Serial.print(" Value:");
+        Serial.println(data.value);
+    }
 }
 
-void onSubscribe(uint32_t seqId, const UartMessageInterface::SubscribeData* dataArr, size_t arrSize)
-{
-    Serial.println(__FUNCTION__);
-    onRequestGet(seqId, dataArr, arrSize);
-}
-
-void onUnsubscribe(uint32_t seqId, const UartMessageInterface::UnsubscribeData* dataArr, size_t arrSize)
-{
-    Serial.println(__FUNCTION__);
-    onRequestGet(seqId, dataArr, arrSize);
-}
-
-void onRequestSet(uint32_t seqId, const UartMessageInterface::RequestSetData* dataArr, size_t arrSize)
+void onNotification(uint32_t seqId, const UartMessageInterface::NotificationData *dataArr, size_t arrSize)
 {
     Serial.println(__FUNCTION__);
     onResponseGet(seqId, dataArr, arrSize);
 }
 
-void onAcknowledge(uint32_t seqId, unsigned char msgId)
-{
-    Serial.println(__FUNCTION__);
-    Serial.print("SeqId:");
-    Serial.print(seqId);
-    Serial.print("MsgId:");
-    Serial.println((uint32_t)msgId);
-}
+
+uint8_t readBuffer[256] = {0,};
+size_t readBufferIdx = 0;
 
 void setup()
 {
@@ -82,87 +62,104 @@ void setup()
     // Callback 등록
     UartMessageInterface::UartMessageCallbackManagement::registerRequestGetCallBack(onRequestGet);
     UartMessageInterface::UartMessageCallbackManagement::registerResponseGetCallBack(onResponseGet);
-    UartMessageInterface::UartMessageCallbackManagement::registerRequestSetCallBack(onRequestSet);
     UartMessageInterface::UartMessageCallbackManagement::registerNotificationCallBack(onNotification);
-    UartMessageInterface::UartMessageCallbackManagement::registerSubscribeCallBack(onSubscribe);
-    UartMessageInterface::UartMessageCallbackManagement::registerUnsubscribeCallBack(onUnsubscribe);
-    UartMessageInterface::UartMessageCallbackManagement::registerAcknowledgeCallBack(onAcknowledge);
 }
 
+int sequence = 0;
 
+void defaultAction()
+{
+    if (Serial.available() > 0) serialEventHandler();
+}
 
-// the loop function runs over and over again forever
 void loop()
 {
-    digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
-    delay(1000);                     // wait for a second
-    digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
-    delay(1000);                     // wait for a second
+    defaultAction();
+    const int currentSequence = sequence;
+    sequence++;
+    sequence = sequence % 10;
 
-    static uint32_t seqId = 10000;
-    UartMessageInterface::UartMessageSender rspGet(UartMessageInterface::MsgId::ResponseGet);
-    rspGet.setSeqId(seqId++);
-    rspGet.appendResponseGetData(UartMessageInterface::DataType::SensorHumidity, "TENT", sizeof("TENT"), 321);
-    rspGet.appendResponseGetData(UartMessageInterface::DataType::SensorCO2, "ROOM", sizeof("ROOM"), 4321);
-    rspGet.appendResponseGetData(UartMessageInterface::DataType::SensorTemperature, "WATER", sizeof("WATER"), 54321);
-    rspGet.appendResponseGetData(UartMessageInterface::DataType::SensorTemperature, "ROOM", sizeof("ROOM"), 98765);
-    rspGet.appendResponseGetData(UartMessageInterface::DataType::SensorConductivity, "Point1", sizeof("Point1"), seqId * 10);
-    rspGet.sendMessage();
+    delay(200);
+
+    if (currentSequence == 0)
+    {
+        static uint32_t seqId = 10000;
+        UartMessageInterface::UartMessageSender rspGet(UartMessageInterface::MsgId::RequestGet);
+        rspGet.setSeqId(seqId++);
+        rspGet.appendRequestGetData(UartMessageInterface::DataType::SensorPH, "ph", sizeof("ph"));
+        rspGet.appendRequestGetData(UartMessageInterface::DataType::SensorHumidity, "humidity", sizeof("humidityT"));
+        rspGet.appendRequestGetData(UartMessageInterface::DataType::SensorCO2, "co2", sizeof("co2"));
+        rspGet.appendRequestGetData(UartMessageInterface::DataType::SensorTemperature, "WATER", sizeof("WATER"));
+        rspGet.appendRequestGetData(UartMessageInterface::DataType::SensorTemperature, "ROOM", sizeof("ROOM"));
+        rspGet.appendRequestGetData(UartMessageInterface::DataType::SensorConductivity, "conducti", sizeof("conducti"));
+        rspGet.sendMessage();
+        return;
+    }
+
+    if (currentSequence == 1)
+    {
+        digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
+        return;
+    }
+
+    if (currentSequence == 6)
+    {
+        digitalWrite(LED_BUILTIN, LOW); // turn the LED on (HIGH is the voltage level)
+        return;
+    }
 }
 
-// uint8_t readBuffer[128] = {0,};
-// size_t readBufferIdx = 0;
-// void serialEvent()
-// {
-//     while (Serial.available() > 0)
-//     {
-//         readBuffer[readBufferIdx++] = (uint8_t)Serial.read();
+void serialEventHandler()
+{
+    while (Serial.available() > 0)
+    {
+        readBuffer[readBufferIdx++] = (uint8_t)Serial.read();
 
-//         bool isBegin = false;
-//         if (readBufferIdx >= 7)
-//         {
-//             if (memcmp(readBuffer + readBufferIdx - 7, "<BEGIN>", 7) == 0)
-//             {
-//                 isBegin = true;
-//             }
-//         }
+        bool isBegin = false;
+        if (readBufferIdx >= 7)
+        {
+            if (memcmp(readBuffer + readBufferIdx - 7, "<BEGIN>", 7) == 0)
+            {
+                isBegin = true;
+            }
+        }
 
-//         if (isBegin)
-//         {
-//             // Serial.println("BEGIN FOUND!!");
+        if (isBegin)
+        {
+            Serial.println("Begin FOUND!!");
 
-//             memset(readBuffer, 0x00, sizeof(readBuffer));
-//             readBufferIdx = 0;
-//             continue;
-//         }
+            memset(readBuffer, 0x00, sizeof(readBuffer));
+            readBufferIdx = 0;
+            continue;
+        }
 
-//         bool isEnd = false;
-//         if (readBufferIdx >= 5)
-//         {
-//             if (memcmp(readBuffer + readBufferIdx - 5, "<END>", 5) == 0)
-//             {
-//                 isEnd = true;
-//             }
-//         }
+        bool isEnd = false;
+        if (readBufferIdx >= 5)
+        {
+            if (memcmp(readBuffer + readBufferIdx - 5, "<END>", 5) == 0)
+            {
+                isEnd = true;
+            }
+        }
 
-//         if (isEnd)
-//         {
-//             // Serial.println("END FOUND!!");
+        if (isEnd)
+        {
+            Serial.println("End FOUND!!");
 
-//             readBufferIdx = readBufferIdx - 5;
-//             UartMessageInterface::UartMessageReceiver rcv(readBuffer, readBufferIdx);
-//             rcv.processMessage();
+            readBufferIdx = readBufferIdx - 5;
+            UartMessageInterface::UartMessageReceiver rcv(readBuffer, readBufferIdx);
+            rcv.processMessage();
 
-//             memset(readBuffer, 0x00, sizeof(readBuffer));
-//             readBufferIdx = 0;
+            memset(readBuffer, 0x00, sizeof(readBuffer));
+            readBufferIdx = 0;
 
-//             continue;
-//         }
+            continue;
+        }
 
-//         if(readBufferIdx == 128)
-//         {
-//             memset(readBuffer, 0x00, sizeof(readBuffer));
-//             readBufferIdx = 0;
-//         }
-//     }
-// }
+        if (readBufferIdx == 256)
+        {
+            memset(readBuffer, 0x00, sizeof(readBuffer));
+            readBufferIdx = 0;
+        }
+    }
+}
