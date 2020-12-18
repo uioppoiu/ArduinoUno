@@ -9,23 +9,27 @@ namespace UartMessageInterface
         switch (input)
         {
         case DataType::SensorAll:
-            return "SensorAll";
-        case DataType::SensorTemperature:
-            return "Temp";
+            return "SensAll";
+        case DataType::SensorRoomTemperature:
+            return "TempRoom";
+        case DataType::SensorWaterTemperature:
+            return "TempWater";
         case DataType::SensorCO2:
             return "CO2";
         case DataType::SensorHumidity:
             return "Humid";
         case DataType::SensorConductivity:
-            return "Conduct";
+            return "Cond";
+        case DataType::SensorPH:
+            return "PH";
         case DataType::ControlAll:
             return "CtrlAll";
         case DataType::Control0:
-            return "Control0";
+            return "Ctrl0";
         case DataType::Control1:
-            return "Control1";
+            return "Ctrl1";
         case DataType::Control2:
-            return "Control2";
+            return "Ctrl2";
         case DataType::DateTime:
             return "DateTime";
         default:
