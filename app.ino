@@ -136,7 +136,7 @@ void loop()
     defaultAction();
     const int currentSequence = sequence;
     sequence++;
-    sequence = sequence % 3000;
+    sequence = sequence % 1000;
 
     delay(1);
 
